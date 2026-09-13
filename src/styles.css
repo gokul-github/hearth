@@ -1,0 +1,98 @@
+@import url("https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --color-background: #f3efe7;
+  --color-foreground: #1a1814;
+  --color-card: #fcfaf6;
+  --color-card-foreground: #1a1814;
+  --color-popover: #fcfaf6;
+  --color-popover-foreground: #1a1814;
+  --color-primary: #2f4a3c;
+  --color-primary-foreground: #f3efe7;
+  --color-secondary: #e8e2d6;
+  --color-secondary-foreground: #1a1814;
+  --color-muted: #e8e2d6;
+  --color-muted-foreground: #6f675c;
+  --color-accent: #e8e2d6;
+  --color-accent-foreground: #1a1814;
+  --color-destructive: #8f2d2d;
+  --color-destructive-foreground: #f3efe7;
+  --color-border: #ddd4c6;
+  --color-input: #ddd4c6;
+  --color-ring: #2f4a3c;
+  --color-paper: #f3efe7;
+  --color-ink: #1a1814;
+  --color-forest: #2f4a3c;
+  --color-cream: #fcfaf6;
+  --color-taupe: #6f675c;
+  --radius: 0.75rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --shadow-border:
+    0px 0px 0px 1px rgba(26, 24, 20, 0.06), 0px 1px 2px -1px rgba(26, 24, 20, 0.06),
+    0px 2px 4px 0px rgba(26, 24, 20, 0.04);
+  --shadow-border-hover:
+    0px 0px 0px 1px rgba(26, 24, 20, 0.08), 0px 1px 2px -1px rgba(26, 24, 20, 0.08),
+    0px 2px 4px 0px rgba(26, 24, 20, 0.06);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  body {
+    min-height: 100dvh;
+    font-family: var(--font-sans);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgb(47 74 60 / 0.06), transparent),
+      linear-gradient(rgb(26 24 20 / 0.025) 1px, transparent 1px);
+    background-size: auto, 32px 32px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    font-family: var(--font-display);
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
