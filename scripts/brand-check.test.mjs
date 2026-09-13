@@ -182,6 +182,8 @@ test("siteDeclaresOgTypeGame reads the site contract", () => {
 
 test("a fresh og-pending marker silences the whole gate view", () => {
   const root = makeWorkspace({ siteJson: UTILITY_SITE, pendingAgeMs: 1000 });
+  // Every caller reports this array as a count, so an in-flight card has to
+  // leave nothing behind — a note would print as "brand: 1 warning(s)".
   assert.deepEqual(computeBrandWarnings({ hasCanvas: true, workspaceRoot: root }), []);
   assert.deepEqual(computeBrandWarnings({ hasCanvas: false, workspaceRoot: root }), []);
 });
@@ -275,6 +277,7 @@ test("cli: a non-game with no card fails too — the pass exists to produce one"
   assert.equal(result.ok, false);
   assert.equal(result.warnings, 1);
   assert.match(result.messages[0], /^BRAND WARNING: .*og\.jpg is missing and this pass exists/);
+  // The parent's gate keeps tolerating the placeholder for a plain utility.
   assert.match(computeBrandWarnings({ hasCanvas: false, workspaceRoot: root })[0], /^BRAND NOTE:/);
 });
 
@@ -285,6 +288,7 @@ test("cli: --placeholder-ok is how a plain-utility pass reports no card as expec
   const result = JSON.parse(run.stdout);
   assert.equal(result.ok, true);
   assert.match(result.messages[0], /^BRAND NOTE:/);
+  // A game is never a placeholder app, so the flag cannot excuse one.
   const game = runCheck(root, ["--game", "--placeholder-ok"]);
   assert.equal(game.status, 1, game.stdout + game.stderr);
   assert.match(JSON.parse(game.stdout).messages[0], /^BRAND WARNING: .*not done/s);
@@ -297,10 +301,13 @@ test("cli: a non-game with a compliant card passes", () => {
   assert.deepEqual(JSON.parse(run.stdout).messages, []);
 });
 
+// --- the prompts are the only enforcement here, so pin them to the code ---
+
 const readDoc = (rel) => readFileSync(join(TEMPLATE_ROOT, rel), "utf8");
 
 test("SKILL.md and AGENTS.md name the marker path and bound this script uses", () => {
-  const bound = new RegExp(`${OG_PENDING_MAX_AGE_MS / 60_000}\s+minutes`);
+  // Prose wraps, so the minute count may straddle a line break.
+  const bound = new RegExp(`${OG_PENDING_MAX_AGE_MS / 60_000}\\s+minutes`);
   for (const rel of [".grok/skills/og/SKILL.md", "AGENTS.md"]) {
     const doc = readDoc(rel);
     assert.ok(doc.includes(`/workspace/${OG_PENDING_REL_PATH}`), `${rel}: marker path`);
@@ -308,6 +315,9 @@ test("SKILL.md and AGENTS.md name the marker path and bound this script uses", (
   }
 });
 
+// The two places that own "never wait on the brand task". Scanning the whole
+// of AGENTS.md instead would make every unrelated `wait_tasks` mention a future
+// feature adds to it this test's business.
 const PROHIBITION_SECTIONS = [
   {
     rel: ".grok/skills/og/SKILL.md",
@@ -329,10 +339,14 @@ function prohibitionSection({ rel, label, from, until }) {
   assert.notEqual(start, -1, `${rel}: ${label} moved — no "${from.trim()}"`);
   const rest = doc.slice(start + from.length);
   const end = rest.search(until);
+  // Markdown emphasis and prose wrapping both sit between the two words.
   return (from + (end === -1 ? rest : rest.slice(0, end))).replace(/[`*]/g, "").replace(/\s+/g, " ");
 }
 
 test("the sections that own the brand-task prohibition never affirm a wait", () => {
+  // Pinned on the shape of the prohibition, not on a negation being somewhere
+  // nearby: "So: wait_tasks before the final verify, but never get_task_output"
+  // keeps a negation in the sentence while instructing exactly the wait.
   const connectors = /(?:\s|[/,;]|\band\b|\bor\b|\bwait_tasks\b|\bget_task_output\b)+$/i;
   const negation = /\b(?:no|never|not|don['’]t)$/i;
   for (const section of PROHIBITION_SECTIONS) {
