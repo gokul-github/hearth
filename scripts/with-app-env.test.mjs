@@ -9,8 +9,11 @@ import {
   APP_ENV_REL_PATH,
   mergeAppEnv,
   parseAppEnv,
+  parseDotEnv,
+  pickServerEnv,
   projectRoot,
   readAppEnv,
+  readLocalServerEnv,
 } from "./with-app-env.mjs";
 
 const execFileAsync = promisify(execFile);
@@ -125,4 +128,47 @@ test("the CLI still runs when invoked through a symlinked path", async () => {
     PRINT_FLAG,
   ]);
   assert.equal(stdout, "false");
+});
+
+test("parseDotEnv reads KEY=VALUE, quotes, and comments", () => {
+  const parsed = parseDotEnv(`
+# comment
+XAI_API_KEY="xai-secret"
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+EMPTY=
+NOT A LINE
+`);
+  assert.equal(parsed.XAI_API_KEY, "xai-secret");
+  assert.equal(parsed.OLLAMA_BASE_URL, "http://127.0.0.1:11434");
+  assert.equal(parsed.EMPTY, "");
+});
+
+test("pickServerEnv drops unknown and VITE_ keys", () => {
+  assert.deepEqual(
+    pickServerEnv({
+      XAI_API_KEY: " k ",
+      VITE_AUTH_ENABLED: "false",
+      SECRET_STUFF: "nope",
+      OLLAMA_MODEL: "",
+    }),
+    { XAI_API_KEY: "k" },
+  );
+});
+
+test("readLocalServerEnv prefers .env.local over .env", () => {
+  const root = mkdtempSync(join(tmpdir(), "app-env-dotenv-"));
+  writeFileSync(join(root, ".env"), "XAI_API_KEY=from-env\nOLLAMA_MODEL=llama3.2\n");
+  writeFileSync(join(root, ".env.local"), "XAI_API_KEY=from-local\n");
+  assert.deepEqual(readLocalServerEnv(root), {
+    XAI_API_KEY: "from-local",
+    OLLAMA_MODEL: "llama3.2",
+  });
+});
+
+test("an explicit process-env override wins over a local .env server key", () => {
+  const merged = mergeAppEnv(
+    { ...{ VITE_AUTH_ENABLED: "false" }, ...{ XAI_API_KEY: "from-file" } },
+    { XAI_API_KEY: "from-shell" },
+  );
+  assert.equal(merged.XAI_API_KEY, "from-shell");
 });

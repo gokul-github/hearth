@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { LoaderCircle, ListOrdered, Trash2 } from "lucide-react";
+import { LoaderCircle, ListOrdered, Mic, Trash2 } from "lucide-react";
 import { addTask, deleteTask, loadToday, toggleTask, type DayStats, type TaskRow } from "@/lib/household";
 import { breakdownTask, planMyDay } from "@/lib/coach";
 import { TIMES_OF_DAY, categoryLabel } from "@/lib/categories";
@@ -11,6 +11,7 @@ import { CategoryIcon } from "@/components/category-icon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -144,8 +145,22 @@ export function TodayView() {
         <TodaySkeleton />
       ) : (
         <>
+          <Card className="mb-6 flex items-start gap-3 p-4">
+            <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Mic className="size-4" strokeWidth={1.75} />
+            </span>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              On an Echo: “Alexa, ask Hearth to mark cooking done.” Enable the
+              Hearth skill and link this account in the Alexa app.
+            </p>
+          </Card>
           <div className="mb-6 grid gap-3 sm:grid-cols-3">
-            <StatCard label="Done" value={`${stats?.done ?? 0} / ${stats?.total ?? 0}`} hint={`${pct}% of the list`} />
+            <StatCard
+              label="Done"
+              value={`${stats?.done ?? 0} / ${stats?.total ?? 0}`}
+              hint={`${pct}% of the list`}
+              progress={pct}
+            />
             <StatCard
               label="Time left"
               value={`${stats?.minutesLeft ?? 0}m`}
@@ -179,7 +194,7 @@ export function TodayView() {
               {grouped.map((group) => (
                 <section key={group.id}>
                   <h2 className="mb-3 font-display text-lg font-medium">{group.label}</h2>
-                  <ul className="flex flex-col gap-2">
+                  <ul className="stagger flex flex-col gap-2">
                     {group.items.map((task) => (
                       <li key={task.id}>
                         <TaskRowCard
@@ -216,12 +231,25 @@ export function TodayView() {
   );
 }
 
-function StatCard({ label, value, hint }: { label: string; value: string; hint: string }) {
+function StatCard({
+  label,
+  value,
+  hint,
+  progress,
+}: {
+  label: string;
+  value: string;
+  hint: string;
+  progress?: number;
+}) {
   return (
-    <Card className="p-4">
-      <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{label}</p>
+    <Card className="overflow-hidden p-4">
+      <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">{label}</p>
       <p className="mt-1 font-display text-2xl font-medium tabular-nums">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+      {typeof progress === "number" ? (
+        <Progress value={progress} className="mt-3 h-1.5" />
+      ) : null}
     </Card>
   );
 }
@@ -238,14 +266,22 @@ function TaskRowCard({
   onBreakdown: () => void;
 }) {
   return (
-    <Card className="flex items-center gap-3 p-3 pr-2">
+    <Card
+      className={`flex items-center gap-3 p-3 pr-2 transition-[opacity,transform] duration-[var(--motion-fast)] ease-[var(--ease-smooth-out)] ${
+        task.done ? "opacity-60" : "opacity-100"
+      }`}
+    >
       <Checkbox
         checked={task.done}
         onCheckedChange={(v) => onToggle(task, v === true)}
         aria-label={`Mark ${task.title} ${task.done ? "not done" : "done"}`}
       />
       <div className="min-w-0 flex-1">
-        <p className={`truncate text-sm font-medium ${task.done ? "text-muted-foreground line-through" : ""}`}>
+        <p
+          className={`truncate text-sm font-medium transition-colors duration-[var(--motion-fast)] ${
+            task.done ? "text-muted-foreground line-through" : ""
+          }`}
+        >
           {task.title}
         </p>
         <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">

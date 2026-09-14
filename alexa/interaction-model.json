@@ -1,0 +1,69 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "hearth",
+      "intents": [
+        {
+          "name": "CompleteChoreIntent",
+          "slots": [
+            {
+              "name": "chore",
+              "type": "CHORE"
+            }
+          ],
+          "samples": [
+            "mark {chore} done",
+            "mark {chore} as done",
+            "check off {chore}",
+            "i finished {chore}",
+            "i completed {chore}",
+            "completed {chore}",
+            "done with {chore}",
+            "update {chore} to done",
+            "set {chore} to done",
+            "update the checklist {chore} done",
+            "{chore} done",
+            "{chore}"
+          ]
+        },
+        {
+          "name": "WhatsLeftIntent",
+          "samples": [
+            "what's left today",
+            "what is left",
+            "what's still open",
+            "what do i have left"
+          ]
+        },
+        {
+          "name": "ListTodayIntent",
+          "samples": [
+            "what's on my list",
+            "what's on today",
+            "read my checklist",
+            "what's on the checklist"
+          ]
+        },
+        { "name": "AMAZON.HelpIntent", "samples": [] },
+        { "name": "AMAZON.StopIntent", "samples": [] },
+        { "name": "AMAZON.CancelIntent", "samples": [] },
+        { "name": "AMAZON.FallbackIntent", "samples": [] }
+      ],
+      "types": [
+        {
+          "name": "CHORE",
+          "values": [
+            { "name": { "value": "cooking", "synonyms": ["cook", "dinner", "breakfast", "lunch", "meal"] } },
+            { "name": { "value": "laundry", "synonyms": ["wash", "clothes", "washing"] } },
+            { "name": { "value": "gym", "synonyms": ["workout", "exercise"] } },
+            { "name": { "value": "shower", "synonyms": ["bath", "bathing"] } },
+            { "name": { "value": "cleaning", "synonyms": ["clean", "bathroom"] } },
+            { "name": { "value": "kitchen", "synonyms": ["counters", "dishes", "sink"] } },
+            { "name": { "value": "make the bed", "synonyms": ["bed"] } },
+            { "name": { "value": "take out trash", "synonyms": ["trash"] } }
+          ]
+        }
+      ]
+    }
+  }
+}

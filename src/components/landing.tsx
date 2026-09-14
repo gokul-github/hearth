@@ -26,42 +26,50 @@ const CHORES = [
 export function Landing() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-5xl flex-col px-4 py-6 md:px-6">
-      <header className="flex items-center justify-between">
+      <header className="reveal flex items-center justify-between">
         <div className="flex items-center gap-2">
           <HearthMark />
           <span className="font-display text-xl font-medium">Hearth</span>
         </div>
         <Button asChild variant="outline" size="sm">
-          <Link to="/login">Sign in</Link>
+          <Link to="/login" search={{ callbackURL: "/" }}>
+            Sign in
+          </Link>
         </Button>
       </header>
 
       <main className="flex flex-1 flex-col justify-center py-12 md:py-16">
-        <p className="mb-4 text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-          Household companion
-        </p>
-        <h1 className="max-w-xl font-display text-4xl leading-[1.12] font-medium tracking-tight text-foreground md:text-6xl">
-          Keep house without keeping it all in your head.
-        </h1>
-        <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground md:text-lg">
-          Hearth tracks the small daily work — gym, shower, cooking, laundry,
-          kitchen counters — and a calm AI coach helps you plan the day when
-          you ask.
-        </p>
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button asChild size="lg">
-            <Link to="/login">Create your account</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link to="/login">I already have one</Link>
-          </Button>
+        <div className="stagger">
+          <p className="mb-4 text-xs font-medium tracking-widest text-muted-foreground uppercase">
+            Household companion
+          </p>
+          <h1 className="max-w-xl font-display text-4xl leading-[1.12] font-medium tracking-tight text-foreground md:text-6xl">
+            Keep house without keeping it all in your head.
+          </h1>
+          <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground md:text-lg">
+            Hearth tracks the small daily work — gym, shower, cooking, laundry,
+            kitchen counters — and a calm AI coach helps you plan the day when
+            you ask.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button asChild size="lg">
+              <Link to="/login" search={{ callbackURL: "/" }}>
+                Create your account
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/login" search={{ callbackURL: "/" }}>
+                I already have one
+              </Link>
+            </Button>
+          </div>
         </div>
 
-        <ul className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
+        <ul className="stagger mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
           {CHORES.map((item) => (
             <li
               key={item.label}
-              className="flex items-center gap-2 rounded-lg bg-card px-3 py-3 shadow-[var(--shadow-border)]"
+              className="lift flex items-center gap-2 rounded-2xl bg-card px-3 py-3 shadow-[var(--shadow-border)]"
             >
               <item.icon className="size-4 text-primary" strokeWidth={1.75} />
               <span className="text-sm font-medium">{item.label}</span>
@@ -70,7 +78,7 @@ export function Landing() {
         </ul>
       </main>
 
-      <section className="mb-10 grid gap-4 md:grid-cols-3">
+      <section className="stagger mb-10 grid gap-4 md:grid-cols-3">
         <Feature
           icon={House}
           title="Today, not forever"
@@ -101,8 +109,10 @@ function Feature({
   body: string;
 }) {
   return (
-    <article className="rounded-xl bg-card p-5 shadow-[var(--shadow-border)]">
-      <Icon className="mb-3 size-5 text-primary" strokeWidth={1.75} />
+    <article className="lift rounded-2xl bg-card p-5 shadow-[var(--shadow-border)]">
+      <span className="mb-4 inline-flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <Icon className="size-5" strokeWidth={1.75} />
+      </span>
       <h2 className="font-display text-lg font-medium">{title}</h2>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
     </article>

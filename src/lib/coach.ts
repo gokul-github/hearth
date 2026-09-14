@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { completeChat, aiAvailable } from "@/lib/ai/complete";
+import { completeChat, aiAvailable, aiProvider, AI_SETUP_HINT } from "@/lib/ai/complete";
 import { CATEGORIES, isCategoryId, isTimeOfDay } from "@/lib/categories";
 import { weekdayOf } from "@/lib/utils";
 
@@ -98,7 +98,11 @@ function stripHearthBlock(text: string): string {
 
 export const getCoachStatus = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
-  .handler(async () => ({ available: aiAvailable() }));
+  .handler(async () => ({
+    available: aiAvailable(),
+    provider: aiProvider(),
+    hint: aiAvailable() ? null : AI_SETUP_HINT,
+  }));
 
 export const listCoachMessages = createServerFn({ method: "GET" })
   .middleware([authMiddleware])

@@ -7,6 +7,7 @@ import { AppShell, PageHeading } from "@/components/app-shell";
 import { CategoryIcon } from "@/components/category-icon";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function WeekView() {
@@ -52,18 +53,19 @@ export function WeekView() {
           ))}
         </div>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="stagger grid gap-3 md:grid-cols-2">
           {days.map((date, index) => {
             const items = tasks.filter((t) => t.due_date === date);
             const done = items.filter((t) => t.done).length;
             const isToday = date === today;
+            const pct = items.length > 0 ? Math.round((done / items.length) * 100) : 0;
             return (
               <Card key={date} className={`p-4 ${isToday ? "ring-1 ring-primary/30" : ""}`}>
-                <div className="mb-3 flex items-baseline justify-between">
+                <div className="mb-2 flex items-baseline justify-between">
                   <h2 className="font-display text-lg font-medium">
                     {WEEKDAY_LABELS[index]}
                     {isToday ? (
-                      <span className="ml-2 text-xs font-medium tracking-wide text-primary uppercase">
+                      <span className="ml-2 text-xs font-medium tracking-widest text-primary uppercase">
                         Today
                       </span>
                     ) : null}
@@ -72,6 +74,7 @@ export function WeekView() {
                     {done}/{items.length}
                   </p>
                 </div>
+                <Progress value={pct} className="mb-3 h-1" />
                 {items.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Rest day on the list.</p>
                 ) : (
@@ -97,7 +100,7 @@ export function WeekView() {
                         />
                         <CategoryIcon category={task.category} className="size-3.5 shrink-0 text-muted-foreground" />
                         <span
-                          className={`min-w-0 truncate text-sm ${task.done ? "text-muted-foreground line-through" : ""}`}
+                          className={`min-w-0 truncate text-sm transition-colors duration-[var(--motion-fast)] ${task.done ? "text-muted-foreground line-through" : ""}`}
                         >
                           {task.title}
                         </span>

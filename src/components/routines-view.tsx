@@ -262,7 +262,7 @@ export function RoutinesView() {
           </p>
         </Card>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="stagger flex flex-col gap-2">
           {rows.map((row) => (
             <li key={row.id}>
               <Card className="flex items-center gap-3 p-4">

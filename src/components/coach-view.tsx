@@ -81,8 +81,24 @@ export function CoachView() {
     <AppShell>
       <PageHeading kicker="Ask when you need it" title="Coach" />
       {!available ? (
-        <Card className="mb-4 p-4 text-sm text-muted-foreground">
-          AI features are unavailable in this environment. Your list still works.
+        <Card className="mb-4 p-4 text-sm leading-relaxed text-muted-foreground">
+          <p className="font-medium text-foreground">Coach is off on this server.</p>
+          <p className="mt-2">
+            The model key lives on the Hearth process, not in your account. Chores
+            still work. To turn the coach on, set a server variable and restart:
+          </p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            <li>
+              Offline: install Ollama, set{" "}
+              <code className="text-foreground">OLLAMA_BASE_URL</code>
+            </li>
+            <li>
+              Ollama Cloud: set <code className="text-foreground">OLLAMA_API_KEY</code>
+            </li>
+            <li>
+              Grok: set <code className="text-foreground">XAI_API_KEY</code>
+            </li>
+          </ul>
         </Card>
       ) : null}
 
@@ -106,7 +122,7 @@ export function CoachView() {
               {messages.map((m) => (
                 <li
                   key={m.id}
-                  className={`max-w-[42rem] rounded-xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+                  className={`max-w-[42rem] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap [animation:reveal-up_var(--motion-slow)_var(--ease-smooth-out)] ${
                     m.role === "user"
                       ? "ml-auto bg-primary text-primary-foreground"
                       : "bg-card text-card-foreground shadow-[var(--shadow-border)]"
@@ -129,7 +145,7 @@ export function CoachView() {
                 type="button"
                 disabled={busy || !available}
                 onClick={() => send(p)}
-                className="rounded-full bg-card px-3 py-2 text-left text-xs text-muted-foreground shadow-[var(--shadow-border)] transition-colors hover:text-foreground disabled:opacity-50"
+                className="rounded-full bg-card px-3 py-2 text-left text-xs text-muted-foreground shadow-[var(--shadow-border)] transition-[color,transform,box-shadow] duration-[var(--motion-fast)] ease-[var(--ease-smooth-out)] hover:-translate-y-0.5 hover:text-foreground hover:shadow-[var(--shadow-lift)] active:scale-[0.96] disabled:opacity-50"
               >
                 {p}
               </button>

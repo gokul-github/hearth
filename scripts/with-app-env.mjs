@@ -7,12 +7,18 @@
  * `VITE_AUTH_ENABLED` — a divergence that only shows up as a built-output
  * mismatch long after the fact. Anything that starts Vite directly bypasses it.
  *
- * Only `VITE_`-prefixed keys are honored: the file is a build flag carrier, not
- * a secret store, and only `VITE_` vars reach the browser anyway. A real
- * `process.env` entry always wins, so an explicit override still works.
+ * Only `VITE_`-prefixed keys are honored from app-env.json: the file is a build
+ * flag carrier, not a secret store, and only `VITE_` vars reach the browser.
+ * A real `process.env` entry always wins, so an explicit override still works.
  *
- * That precedence also means the file governs this workspace only. A deployed
- * build runs with the provider's project env, where the deployer sets
+ * Vite's own `loadEnv` also only copies `VITE_` keys from `.env` into
+ * `import.meta.env`. Server secrets (`XAI_API_KEY`, `OLLAMA_BASE_URL`, …) in a
+ * local `.env` would otherwise be ignored — we lift an allowlist into the child
+ * process so a self-hosted clone can configure the coach without exporting vars
+ * by hand. Never put those keys on `VITE_`.
+ *
+ * That precedence also means app-env.json governs this workspace only. A
+ * deployed build runs with the provider's project env, where the deployer sets
  * `VITE_AUTH_ENABLED` itself (today unconditionally `"true"`), so the deployed
  * flag is the platform's, not this file's.
  *
@@ -28,6 +34,18 @@ import { fileURLToPath } from "node:url";
 export const APP_ENV_REL_PATH = ".grok/app-env.json";
 
 const VITE_PREFIX = "VITE_";
+
+/** Server-only secrets a local `.env` may supply. Never `VITE_`-prefix these. */
+export const SERVER_ENV_KEYS = [
+  "XAI_API_KEY",
+  "OLLAMA_API_KEY",
+  "OLLAMA_BASE_URL",
+  "OLLAMA_MODEL",
+  "DATABASE_URL",
+  "ALEXA_OAUTH_CLIENT_ID",
+  "ALEXA_OAUTH_CLIENT_SECRET",
+  "ALEXA_SKILL_ID",
+];
 
 /**
  * Parse an app-env document, keeping only `VITE_`-prefixed string entries.
@@ -63,6 +81,49 @@ export function readAppEnv(root) {
 /** File values under the process environment: an explicit override wins. */
 export function mergeAppEnv(appEnv, processEnv) {
   return { ...appEnv, ...processEnv };
+}
+
+/** Minimal KEY=VALUE parser for local `.env` files. */
+export function parseDotEnv(text) {
+  const env = {};
+  for (const raw of String(text ?? "").split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const idx = line.indexOf("=");
+    if (idx < 1) continue;
+    const key = line.slice(0, idx).trim();
+    let value = line.slice(idx + 1).trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    env[key] = value;
+  }
+  return env;
+}
+
+export function pickServerEnv(parsed) {
+  const env = {};
+  for (const key of SERVER_ENV_KEYS) {
+    const value = typeof parsed[key] === "string" ? parsed[key].trim() : "";
+    if (value) env[key] = value;
+  }
+  return env;
+}
+
+/** Allowlisted server keys from `.env` then `.env.local`. Missing files are a no-op. */
+export function readLocalServerEnv(root) {
+  const merged = {};
+  for (const name of [".env", ".env.local"]) {
+    try {
+      Object.assign(merged, pickServerEnv(parseDotEnv(readFileSync(join(root, name), "utf8"))));
+    } catch {
+      /* file absent or unreadable */
+    }
+  }
+  return merged;
 }
 
 /**
@@ -110,7 +171,11 @@ function main(argv) {
     console.error("usage: node scripts/with-app-env.mjs <command> [args…]");
     process.exit(2);
   }
-  const env = mergeAppEnv(readAppEnv(projectRoot()), process.env);
+  const root = projectRoot();
+  const env = mergeAppEnv(
+    { ...readAppEnv(root), ...readLocalServerEnv(root) },
+    process.env,
+  );
   const child = spawn(command, args, { stdio: "inherit", env });
   // The dev server is long-running and is stopped by signalling this wrapper.
   for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) {

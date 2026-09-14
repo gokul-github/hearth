@@ -43,6 +43,10 @@ function isoDate(value: string): string {
   return value;
 }
 
+export async function ensureTodaySeeded(userId: string, date: string) {
+  await ensureSeeded(userId, date);
+}
+
 async function ensureSeeded(userId: string, date: string) {
   const sql = await getSql();
   const existing = await sql<{ user_id: string; seeded: boolean }>`
@@ -272,6 +276,7 @@ export const listWeek = createServerFn({ method: "POST" })
 
     await ensureSeeded(context.userId, start);
     const sql = await getSql();
+    // Spawn each day of the week from routines
     for (let i = 0; i < 7; i++) {
       const dt = new Date(y, (m ?? 1) - 1, (d ?? 1) + i);
       const iso = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;

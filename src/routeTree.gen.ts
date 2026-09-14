@@ -14,7 +14,11 @@ import { Route as CoachRouteImport } from './routes/coach'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RoutinesRouteImport } from './routes/routines'
 import { Route as WeekRouteImport } from './routes/week'
+import { Route as AlexaLinkRouteImport } from './routes/alexa/link'
+import { Route as ApiAlexaRouteImport } from './routes/api/alexa'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiAlexaOauthAuthorizeRouteImport } from './routes/api/alexa.oauth.authorize'
+import { Route as ApiAlexaOauthTokenRouteImport } from './routes/api/alexa.oauth.token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -41,10 +45,30 @@ const WeekRoute = WeekRouteImport.update({
   path: '/week',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlexaLinkRoute = AlexaLinkRouteImport.update({
+  id: '/alexa/link',
+  path: '/alexa/link',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAlexaRoute = ApiAlexaRouteImport.update({
+  id: '/api/alexa',
+  path: '/api/alexa',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAlexaOauthAuthorizeRoute = ApiAlexaOauthAuthorizeRouteImport.update({
+  id: '/oauth/authorize',
+  path: '/oauth/authorize',
+  getParentRoute: () => ApiAlexaRoute,
+} as any)
+const ApiAlexaOauthTokenRoute = ApiAlexaOauthTokenRouteImport.update({
+  id: '/oauth/token',
+  path: '/oauth/token',
+  getParentRoute: () => ApiAlexaRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -53,7 +77,11 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/routines': typeof RoutinesRoute
   '/week': typeof WeekRoute
+  '/alexa/link': typeof AlexaLinkRoute
+  '/api/alexa': typeof ApiAlexaRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/alexa/oauth/authorize': typeof ApiAlexaOauthAuthorizeRoute
+  '/api/alexa/oauth/token': typeof ApiAlexaOauthTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,7 +89,11 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/routines': typeof RoutinesRoute
   '/week': typeof WeekRoute
+  '/alexa/link': typeof AlexaLinkRoute
+  '/api/alexa': typeof ApiAlexaRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/alexa/oauth/authorize': typeof ApiAlexaOauthAuthorizeRoute
+  '/api/alexa/oauth/token': typeof ApiAlexaOauthTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,13 +102,37 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/routines': typeof RoutinesRoute
   '/week': typeof WeekRoute
+  '/alexa/link': typeof AlexaLinkRoute
+  '/api/alexa': typeof ApiAlexaRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/alexa/oauth/authorize': typeof ApiAlexaOauthAuthorizeRoute
+  '/api/alexa/oauth/token': typeof ApiAlexaOauthTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/coach' | '/login' | '/routines' | '/week' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/coach'
+    | '/login'
+    | '/routines'
+    | '/week'
+    | '/alexa/link'
+    | '/api/alexa'
+    | '/api/auth/$'
+    | '/api/alexa/oauth/authorize'
+    | '/api/alexa/oauth/token'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/coach' | '/login' | '/routines' | '/week' | '/api/auth/$'
+  to:
+    | '/'
+    | '/coach'
+    | '/login'
+    | '/routines'
+    | '/week'
+    | '/alexa/link'
+    | '/api/alexa'
+    | '/api/auth/$'
+    | '/api/alexa/oauth/authorize'
+    | '/api/alexa/oauth/token'
   id:
     | '__root__'
     | '/'
@@ -84,7 +140,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/routines'
     | '/week'
+    | '/alexa/link'
+    | '/api/alexa'
     | '/api/auth/$'
+    | '/api/alexa/oauth/authorize'
+    | '/api/alexa/oauth/token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -93,6 +153,8 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RoutinesRoute: typeof RoutinesRoute
   WeekRoute: typeof WeekRoute
+  AlexaLinkRoute: typeof AlexaLinkRoute
+  ApiAlexaRoute: typeof ApiAlexaRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -133,6 +195,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WeekRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/alexa/link': {
+      id: '/alexa/link'
+      path: '/alexa/link'
+      fullPath: '/alexa/link'
+      preLoaderRoute: typeof AlexaLinkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/alexa': {
+      id: '/api/alexa'
+      path: '/api/alexa'
+      fullPath: '/api/alexa'
+      preLoaderRoute: typeof ApiAlexaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -140,8 +216,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/alexa/oauth/authorize': {
+      id: '/api/alexa/oauth/authorize'
+      path: '/oauth/authorize'
+      fullPath: '/api/alexa/oauth/authorize'
+      preLoaderRoute: typeof ApiAlexaOauthAuthorizeRouteImport
+      parentRoute: typeof ApiAlexaRoute
+    }
+    '/api/alexa/oauth/token': {
+      id: '/api/alexa/oauth/token'
+      path: '/oauth/token'
+      fullPath: '/api/alexa/oauth/token'
+      preLoaderRoute: typeof ApiAlexaOauthTokenRouteImport
+      parentRoute: typeof ApiAlexaRoute
+    }
   }
 }
+
+interface ApiAlexaRouteChildren {
+  ApiAlexaOauthAuthorizeRoute: typeof ApiAlexaOauthAuthorizeRoute
+  ApiAlexaOauthTokenRoute: typeof ApiAlexaOauthTokenRoute
+}
+
+const ApiAlexaRouteChildren: ApiAlexaRouteChildren = {
+  ApiAlexaOauthAuthorizeRoute: ApiAlexaOauthAuthorizeRoute,
+  ApiAlexaOauthTokenRoute: ApiAlexaOauthTokenRoute,
+}
+
+const ApiAlexaRouteWithChildren = ApiAlexaRoute._addFileChildren(
+  ApiAlexaRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -149,6 +253,8 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RoutinesRoute: RoutinesRoute,
   WeekRoute: WeekRoute,
+  AlexaLinkRoute: AlexaLinkRoute,
+  ApiAlexaRoute: ApiAlexaRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
