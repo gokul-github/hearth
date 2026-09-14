@@ -12,6 +12,12 @@ export type CoachMessage = {
   created_at: string;
 };
 
+const FENCE = "`".repeat(3);
+const HEARTH_ADD_EXAMPLE =
+  '{"add":[{"title":"Wipe kitchen counters","category":"kitchen","timeOfDay":"evening","minutes":10}]}';
+const HEARTH_BLOCK_RE = new RegExp(FENCE + "hearth\\s*([\\s\\S]*?)" + FENCE);
+const HEARTH_STRIP_RE = new RegExp(FENCE + "hearth\\s*[\\s\\S]*?" + FENCE, "g");
+
 const SYSTEM = `You are Hearth, a calm household companion. You help one person keep up with everyday home work: gym, bathing, cleaning, cooking, laundry, kitchen counters, and similar chores.
 
 Rules:
@@ -21,9 +27,9 @@ Rules:
 - Never invent medical or injury advice; keep workouts gentle and optional.
 - If you want the app to add chores, append a single fenced block exactly like this (and nothing else inside it):
 
-```hearth
-{"add":[{"title":"Wipe kitchen counters","category":"kitchen","timeOfDay":"evening","minutes":10}]}
-```
+${FENCE}hearth
+${HEARTH_ADD_EXAMPLE}
+${FENCE}
 
 Categories must be one of: gym, care, cleaning, cooking, laundry, kitchen, other.
 timeOfDay must be morning, afternoon, or evening.
@@ -62,7 +68,7 @@ function parseAdds(text: string): Array<{
   timeOfDay: string;
   minutes: number;
 }> {
-  const match = text.match(/```hearth\s*([\s\S]*?)```/);
+  const match = text.match(HEARTH_BLOCK_RE);
   if (!match?.[1]) return [];
   try {
     const parsed = JSON.parse(match[1]) as {
@@ -87,7 +93,7 @@ function parseAdds(text: string): Array<{
 }
 
 function stripHearthBlock(text: string): string {
-  return text.replace(/```hearth\s*[\s\S]*?```/g, "").trim();
+  return text.replace(HEARTH_STRIP_RE, "").trim();
 }
 
 export const getCoachStatus = createServerFn({ method: "GET" })
